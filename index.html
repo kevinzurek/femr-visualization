@@ -26,25 +26,20 @@
 		var width = 850;
 		var height = 450;			
 		var svg = d3.select("body").append("svg").attr({width:width, height: height});
-
+	
+		//draw countries is responsible for everything because javascript and callbacks	
 		drawCountries("geographical_data/countries.json", svg, width, height);		
-		outlineMap(svg, width, height)
-		drawCircles("test_data/haiti-test-data.csv", svg, width, height);
-
 
 	
 		//draws the geoJSON coordinates from the file provided
 		function drawCountries(file, svg, width, height){
-
-			var scale = 7500;
-		
-			d3.json(file, function(json) {
 	
+			var scale = 7500;
+			d3.json(file, function(json) {
 				var offset = [width/2, height/2];
 				var center = d3.geo.centroid(json);
 				var projection = d3.geo.mercator().center(center).scale(scale).translate(offset);
-				var path = d3.geo.path().projection(projection);
-		
+				var path = d3.geo.path().projection(projection);	
 		
 				svg.selectAll("path")
 					.data(json.features)
@@ -53,7 +48,11 @@
 					.attr("d", path)
 					.style('stroke', 'black')
 					.style('fill', 'pink');
+				
+				outlineMap(svg, width, height);
+				drawCircles("test_data/haiti-test-data.csv", svg, width, height, projection);
 			});
+
 		}
 
 		//draws a rectangle around the available space to help identify boundaries
@@ -69,28 +68,26 @@
 		//draws circles based on the location of cities and how many patients have been
 		//seen in those cities. (work in progress). Extracts the information from a csv
 		//file
-		function drawCircles(file, svg, width, height){
+		function drawCircles(file, svg, width, height, projection){
+			
+
 			d3.csv(file, function(csv) {
-		
-
-
-			//var projection = d3.geo.mercator().center(center).scale(scale).translate(offset);
-			//need to build a proper projection for these points
-			svg.selectAll("circle")
-				.data(csv)
-				.enter()
-				.append("circle")
-				.attr("cx", function(d){
-	//				return projection([d.lon, d.lat])[0];
-					return [d.lon, d.lat][0];
-				})
-				.attr("cy", function(d){
-//					return projection([d.lon, d.lat])[1];
-					return [d.lon, d.lat][1];
-				})
-				.attr("r", 5)
-				.style("fill", "yellow")
-				.style("opacity", "0.75");
+			
+				svg.selectAll("circle")
+					.data(csv)
+					.enter()
+					.append("circle")
+					.attr("cx", function(d){
+						var coord = projection([d.lon, d.lat]);
+						return coord[0];
+					})	
+					.attr("cy", function(d){
+						var coord = projection([d.lon, d.lat]);
+						return coord[1];
+					})
+					.style("fill", "yellow")
+					.attr("r", 5)
+					.style("opacity", "0.75");
 			});
 		}
 
