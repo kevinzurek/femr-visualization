@@ -47,10 +47,10 @@
 					.append("path")
 					.attr("d", path)
 					.style('stroke', 'black')
-					.style('fill', 'pink');
+					.style('fill', 'grey');
 				
 				outlineMap(svg, width, height);
-				drawCircles("test_data/haiti-test-data.csv", svg, width, height, projection);
+				drawCircles("test_data/haiti_dr.csv", svg, width, height, projection);
 			});
 
 		}
@@ -85,9 +85,16 @@
 						var coord = projection([d.lon, d.lat]);
 						return coord[1];
 					})
-					.style("fill", "yellow")
-					.attr("r", 5)
-					.style("opacity", "0.75");
+					.style("fill", "red")
+					.style("fill-opacity", function(d){return Math.sqrt(d.count/100);})
+					.attr("r", function(d){
+						//if (d.count > 50)
+						//	return 50;
+						//else
+							//return d.count;
+						return 5;
+					})
+					.style("opacity", "0.5");
 			});
 		}
 
